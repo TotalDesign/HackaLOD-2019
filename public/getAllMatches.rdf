@@ -1,0 +1,18 @@
+PREFIX schema: <http://schema.org/>
+PREFIX dct: <http://purl.org/dc/terms/>
+PREFIX naa: <http://archief.nl/def/>
+PREFIX edm: <http://www.europeana.eu/schemas/edm/>
+PREFIX spif: <http://spinrdf.org/spif#>
+PREFIX ebucore: <http://www.ebu.ch/metadata/ontologies/ebucore/ebucore#>
+PREFIX dc: <http://purl.org/dc/elements/1.1/>
+select *
+from <http://archief.nl/Hackalod2019/Graph:anpGebeurtenissen>
+from <http://archief.nl/NL-HaNA/doc/Graph:ANPLargeSet>
+from <http://archief.nl/NL-HaNA/doc/Graph:FotocollectieNA_FotoMetDatum>
+where {
+    ?photoRef schema:associatedArticle ?anpRef.
+    ?photoRef edm:hasView ?view;
+        dc:identifier ?fileID.
+    ?anpRef dct:source ?source.
+    ?anpRef	dct:description ?description.
+}
