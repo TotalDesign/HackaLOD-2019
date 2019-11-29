@@ -1,8 +1,15 @@
 import React from 'react';
+import SwipeableViews from 'react-swipeable-views';
+import { virtualize, bindKeyboard } from 'react-swipeable-views-utils';
 import axios from 'axios';
 import { http, repository, query } from 'graphdb/lib';
+import moment from 'moment';
+import 'moment/locale/nl';
 import _ from 'underscore';
 import './App.css';
+import Detail from './component/Detail';
+
+moment.locale('nl');
 
 // axios.post(`${process.env.REACT_APP_GDB_BASE_URL}/rest/login/${process.env.REACT_APP_GDB_USERNAME}`, null, {
 //   headers: {
@@ -16,11 +23,7 @@ import './App.css';
 //   getContent(headers);
 // });
 
-axios.get('./getAllMatches.rdf').then(response => {
-  sendQuery(response.data).then(data => {
-    console.log(data);
-  });
-});
+const VirtualizeSwipeableViews = bindKeyboard(virtualize(SwipeableViews));
 
 function sendQuery(sparqlQuery, headers = {}) {
   const { RDFMimeType } = http;
@@ -49,6 +52,7 @@ function sendQuery(sparqlQuery, headers = {}) {
       if (!result) {
         result = {
           id: item.anpRef.value,
+          date: new Date(item.date.value),
           description: item.description.value,
           images: [],
         };
@@ -84,12 +88,59 @@ function sendQuery(sparqlQuery, headers = {}) {
   });
 }
 
-function App() {
-  return (
-    <div className="App">
+class App extends React.Component {
+  constructor(props) {
+    super(props);
 
-    </div>
-  );
+    this.state = {
+      index: 0,
+      results: [],
+    };
+  }
+
+  componentDidMount() {
+    axios.get('./getAllMatches.rdf').then(response => {
+      sendQuery(response.data).then(results => {
+        this.setState({ results });
+      });
+    });
+  }
+
+  handleChangeIndex = index => {
+    this.setState({
+      index,
+    });
+  };
+
+  slideRenderer = (params) => {
+    const { index, key } = params;
+
+    const item = this.state.results[index];
+
+    return (
+      <Detail key={key} {...item} />
+    );
+  };
+
+  render() {
+    if (this.state.results.length > 0) {
+      return (
+        <div className="App">
+          <VirtualizeSwipeableViews
+            index={this.state.index}
+            enableMouseEvents
+            onChangeIndex={this.handleChangeIndex}
+            slideRenderer={this.slideRenderer}
+          />
+        </div>
+      );
+    }
+    else {
+      return (
+        <div className="App"></div>
+      );
+    }
+  }
 }
 
 export default App;

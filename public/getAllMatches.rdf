@@ -10,9 +10,11 @@ from <http://archief.nl/Hackalod2019/Graph:anpGebeurtenissen>
 from <http://archief.nl/NL-HaNA/doc/Graph:ANPLargeSet>
 from <http://archief.nl/NL-HaNA/doc/Graph:FotocollectieNA_FotoMetDatum>
 where {
-    ?photoRef schema:associatedArticle ?anpRef.
-    ?photoRef edm:hasView ?view;
-        dc:identifier ?fileID.
-    ?anpRef dct:source ?source.
-    ?anpRef	dct:description ?description.
+    ?photoRef schema:associatedArticle ?anpRef;
+              edm:hasView ?view;
+              dc:identifier ?fileID.
+    ?anpRef dct:source ?source;
+            dct:description ?description;
+            dct:date ?date.
 }
+order by ?date
