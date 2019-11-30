@@ -1,2 +1,9 @@
 .App {
+    display: flex;
+    flex-direction: column;
+}
+
+.line-label,
+.bound.start {
+    display: none;
 }

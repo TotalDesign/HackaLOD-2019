@@ -1,4 +1,5 @@
 import React from 'react';
+import {Menu, MenuItem} from '@material-ui/core';
 import SwipeableViews from 'react-swipeable-views';
 import { virtualize, bindKeyboard } from 'react-swipeable-views-utils';
 import axios from 'axios';
@@ -9,11 +10,14 @@ import _ from 'underscore';
 import './App.css';
 import Detail from './component/Detail';
 import Home from './component/Home';
+import MenuAppBar from './component/MenuAppBar';
+import Timeline from "./component/Timeline";
 
 moment.locale('nl');
 
-const HOME = 'HOME';
-const DETAIL = 'DETAIL';
+export const HOME = 'HOME';
+export const DETAIL = 'DETAIL';
+const TIMELINE_STATUS_RENDERED = 'TIMELINE_STATUS_RENDERED';
 
 // axios.post(`${process.env.REACT_APP_GDB_BASE_URL}/rest/login/${process.env.REACT_APP_GDB_USERNAME}`, null, {
 //   headers: {
@@ -75,11 +79,11 @@ function sendQuery(sparqlQuery, headers = {}) {
       for (let i = 0; i < images.length; i++) {
         switch (i) {
           case 0:
-            image.small = `http://afbeeldingen.gahetna.nl/naa/download/${images[i]}`;
+            image.small = `https://download-images.memorix.nl/naa/download/${images[i]}`;
             break;
 
           case 1:
-            image.large = `http://afbeeldingen.gahetna.nl/naa/download/${images[i]}`;
+            image.large = `https://download-images.memorix.nl/naa/download/${images[i]}`;
             break;
 
           default:
@@ -97,7 +101,9 @@ class App extends React.Component {
     super(props);
 
     this.state = {
+      anchorEl: null,
       index: 0,
+      isMenuOpen: false,
       results: [],
       display: HOME,
     };
@@ -115,6 +121,10 @@ class App extends React.Component {
     this.setState({
       index,
     });
+  };
+
+  handleViewChange = display => {
+    this.setState({display});
   };
 
   slideRenderer = (params) => {
@@ -161,7 +171,6 @@ class App extends React.Component {
   }
 
   homeClickHandler = index => {
-    console.log(index);
     this.setState({display: DETAIL, index});
   };
 
@@ -173,6 +182,7 @@ class App extends React.Component {
         case HOME:
           return (
             <div className="App">
+              <MenuAppBar onMenuClick={this.handleViewChange}/>
               <Home items={this.getRandomItems(10)} onClick={this.homeClickHandler}/>
             </div>
           );
@@ -181,6 +191,8 @@ class App extends React.Component {
         case DETAIL:
           return (
             <div className="App">
+              <MenuAppBar onMenuClick={this.handleViewChange}/>
+              <Timeline items={this.state.results} index={this.state.index} onChangeIndex={this.handleChangeIndex}/>
               <VirtualizeSwipeableViews
                 index={index}
                 enableMouseEvents

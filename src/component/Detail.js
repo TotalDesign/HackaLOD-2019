@@ -65,17 +65,15 @@ class Detail extends React.Component {
     return (
       <React.Fragment>
         <Container id="back-to-top-anchor">
-          <Box>
-            <Slider images={this.props.images} />
+          <Slider images={this.props.images} />
 
-            <Typography variant="h5" component="h2">{date.format('dddd D MMMM YYYY')}</Typography>
+          <Typography variant="h5" component="h2">{date.format('dddd D MMMM YYYY')}</Typography>
 
-            <Fab className={classes.speak} color="secondary" aria-label="speak" variant="extended" onClick={this.toggleSpeak}>
-              { this.state.speaking ? (<React.Fragment><VolumeOffIcon/> Stop voorlezen</React.Fragment>) : (<React.Fragment><VolumeUpIcon/> Voorlezen</React.Fragment>) }
-            </Fab>
+          <Fab className={classes.speak} color="secondary" aria-label="speak" variant="extended" onClick={this.toggleSpeak}>
+            { this.state.speaking ? (<React.Fragment><VolumeOffIcon/> Stop voorlezen</React.Fragment>) : (<React.Fragment><VolumeUpIcon/> Voorlezen</React.Fragment>) }
+          </Fab>
 
-            <Typography variant="body1" component="p">{this.props.description}</Typography>
-          </Box>
+          <Typography variant="body1" component="p">{this.props.description}</Typography>
         </Container>
       </React.Fragment>
     );
