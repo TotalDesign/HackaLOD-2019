@@ -1,32 +1,85 @@
 import React from 'react';
 import moment from 'moment';
-import { makeStyles } from '@material-ui/core/styles';
-import Card from '@material-ui/core/Card';
-import CardActions from '@material-ui/core/CardActions';
-import CardContent from '@material-ui/core/CardContent';
-import Button from '@material-ui/core/Button';
+import {Box, Container, Fab} from '@material-ui/core';
+import { withStyles } from '@material-ui/core/styles';
+import VolumeOffIcon from '@material-ui/icons/VolumeOff';
+import VolumeUpIcon from '@material-ui/icons/VolumeUp';
 import Typography from '@material-ui/core/Typography';
+import _ from 'underscore';
 import Slider from './Slider';
+import speechUtteranceChunker from '../lib/chunker';
 
-const useStyles = makeStyles({
-  card: {
-    minWidth: 275,
+const synth = window.speechSynthesis;
+
+const styles = ({spacing}) => ({
+  speak: {
+    marginBottom: spacing(2),
+    marginTop: spacing(2),
   }
 });
 
-const Detail = props => {
-  const classes = useStyles();
-  const date = moment(props.date);
+class Detail extends React.Component {
+  constructor(props) {
+    super(props);
 
-  return (
-    <Card className={classes.card}>
-      <CardContent>
-        <Slider images={props.images} />
-        <Typography variant="h5" component="h2">{date.format('dddd D MMMM YYYY')}</Typography>
-        <Typography variant="body1" component="p">{props.description}</Typography>
-      </CardContent>
-    </Card>
-  );
-};
+    this.state = {
+      speaking: false
+    };
+  }
 
-export default Detail;
+  cancelSpeak = () => {
+    synth.cancel();
+    speechUtteranceChunker.cancel = true;
+    this.setState({speaking: false});
+  };
+
+  toggleSpeak = () => {
+    if (this.state.speaking) {
+      this.cancelSpeak();
+    }
+    else {
+      const utterance = new SpeechSynthesisUtterance(this.props.description);
+
+      const voiceArr = synth.getVoices();
+      for (let i = 0; i < voiceArr.length; i++) {
+        if ('nl-NL' === voiceArr[i].lang) {
+          utterance.voice = voiceArr[i];
+        }
+      }
+      utterance.rate = 0.7;
+
+      speechUtteranceChunker(utterance, {
+        chunkLength: 120
+      }, _.bind(function () {
+        this.setState({speaking: false});
+      }, this));
+
+      this.setState({speaking: true});
+    }
+  };
+
+  render() {
+    const { classes } = this.props;
+    const date = moment(this.props.date);
+
+    return (
+      <React.Fragment>
+        <Container id="back-to-top-anchor">
+          <Box>
+            <Slider images={this.props.images} />
+
+            <Typography variant="h5" component="h2">{date.format('dddd D MMMM YYYY')}</Typography>
+
+            <Fab className={classes.speak} color="secondary" aria-label="speak" variant="extended" onClick={this.toggleSpeak}>
+              { this.state.speaking ? (<React.Fragment><VolumeOffIcon/> Stop voorlezen</React.Fragment>) : (<React.Fragment><VolumeUpIcon/> Voorlezen</React.Fragment>) }
+            </Fab>
+
+            <Typography variant="body1" component="p">{this.props.description}</Typography>
+          </Box>
+        </Container>
+      </React.Fragment>
+    );
+  }
+}
+
+export default withStyles(styles)(Detail);

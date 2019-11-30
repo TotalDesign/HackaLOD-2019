@@ -8,8 +8,12 @@ import 'moment/locale/nl';
 import _ from 'underscore';
 import './App.css';
 import Detail from './component/Detail';
+import Home from './component/Home';
 
 moment.locale('nl');
+
+const HOME = 'HOME';
+const DETAIL = 'DETAIL';
 
 // axios.post(`${process.env.REACT_APP_GDB_BASE_URL}/rest/login/${process.env.REACT_APP_GDB_USERNAME}`, null, {
 //   headers: {
@@ -95,6 +99,7 @@ class App extends React.Component {
     this.state = {
       index: 0,
       results: [],
+      display: HOME,
     };
   }
 
@@ -122,18 +127,70 @@ class App extends React.Component {
     );
   };
 
+  getRandomItems(amount) {
+    const items = [];
+    const years = [];
+
+    do {
+      const index = Math.floor(Math.random() * this.state.results.length);
+      const selected = this.state.results[index];
+
+      selected.index = index;
+
+      const year = moment(selected.date).format('YYYY');
+
+      if (-1 === years.indexOf(year)) {
+        items.push(selected);
+        years.push(year);
+      }
+    } while (items.length < amount);
+
+    items.sort(function(a, b) {
+      if (a.date < b.date) {
+        return -1;
+      }
+
+      if (a.date > b.date) {
+        return 1;
+      }
+
+      return 0;
+    });
+
+    return items;
+  }
+
+  homeClickHandler = index => {
+    console.log(index);
+    this.setState({display: DETAIL, index});
+  };
+
   render() {
-    if (this.state.results.length > 0) {
-      return (
-        <div className="App">
-          <VirtualizeSwipeableViews
-            index={this.state.index}
-            enableMouseEvents
-            onChangeIndex={this.handleChangeIndex}
-            slideRenderer={this.slideRenderer}
-          />
-        </div>
-      );
+    const {display, index, results} = this.state;
+
+    if (results.length > 0) {
+      switch(display) {
+        case HOME:
+          return (
+            <div className="App">
+              <Home items={this.getRandomItems(10)} onClick={this.homeClickHandler}/>
+            </div>
+          );
+          break;
+
+        case DETAIL:
+          return (
+            <div className="App">
+              <VirtualizeSwipeableViews
+                index={index}
+                enableMouseEvents
+                onChangeIndex={this.handleChangeIndex}
+                slideRenderer={this.slideRenderer}
+              />
+            </div>
+          );
+          break;
+      }
     }
     else {
       return (
