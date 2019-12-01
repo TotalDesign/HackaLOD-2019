@@ -4,6 +4,7 @@
 }
 
 .line-label,
-.bound.start {
+.bound.start,
+.bound.end {
     display: none;
 }
